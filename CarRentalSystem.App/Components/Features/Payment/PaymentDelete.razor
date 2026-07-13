@@ -1,0 +1,38 @@
+﻿@page "/payments/delete/{Id:int}"
+
+<PageTitle>Delete Payment</PageTitle>
+
+<h3>Delete Payment</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+
+    <a href="/payments" class="btn btn-secondary">
+        Back
+    </a>
+}
+else
+{
+    <div class="alert alert-warning">
+        Are you sure you want to delete payment
+        <strong>#@payment?.PaymentId</strong>
+        with amount
+        <strong>@payment?.Amount.ToString("N2")</strong>?
+    </div>
+
+    <button type="button"
+            class="btn btn-danger"
+            disabled="@isDeleting"
+            @onclick="Delete">
+        @(isDeleting ? "Deleting..." : "Delete")
+    </button>
+
+    <a href="/payments" class="btn btn-secondary">
+        Cancel
+    </a>
+}

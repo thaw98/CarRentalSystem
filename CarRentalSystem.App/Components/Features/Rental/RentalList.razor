@@ -1,0 +1,75 @@
+﻿@page "/rentals"
+
+<PageTitle>Rentals</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Rentals</h3>
+
+    <a href="/rentals/create" class="btn btn-primary">
+        Create Rental
+    </a>
+</div>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+else if (rentals.Count == 0)
+{
+    <div class="alert alert-info">No rentals found.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Car</th>
+                    <th>Rental Date</th>
+                    <th>Return Date</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var rental in rentals)
+                {
+                    <tr>
+                        <td>@rental.RentalId</td>
+                        <td>@rental.CustomerName</td>
+                        <td>@rental.PlateNumber</td>
+                        <td>@rental.RentalDate.ToString("g")</td>
+                        <td>
+                            @(rental.ReturnDate?.ToString("g") ?? "-")
+                        </td>
+                        <td>@rental.TotalAmount.ToString("N2")</td>
+                        <td>
+                            <span class="@GetStatusClass(rental.Status)">
+                                @rental.Status
+                            </span>
+                        </td>
+                        <td>
+                            <a href="/rentals/edit/@rental.RentalId"
+                               class="btn btn-sm btn-warning me-1">
+                                Edit
+                            </a>
+
+                            <a href="/rentals/delete/@rental.RentalId"
+                               class="btn btn-sm btn-danger">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

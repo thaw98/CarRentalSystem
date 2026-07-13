@@ -102,7 +102,9 @@ public class RentalService
     public Result<RentalModel> Create(RentalCreateRequestModel request)
     {
         var customer = _db.TblCustomers
-            .FirstOrDefault(x => x.CustomerId == request.CustomerId && x.IsDelete == false);
+            .FirstOrDefault(x =>
+                x.CustomerId == request.CustomerId &&
+                x.IsDelete == false);
 
         if (customer is null)
         {
@@ -114,7 +116,9 @@ public class RentalService
         }
 
         var car = _db.TblCars
-            .FirstOrDefault(x => x.CarId == request.CarId && x.IsDelete == false);
+            .FirstOrDefault(x =>
+                x.CarId == request.CarId &&
+                x.IsDelete == false);
 
         if (car is null)
         {
@@ -122,6 +126,27 @@ public class RentalService
             {
                 IsSuccess = false,
                 Message = "Car not found."
+            };
+        }
+
+        if (request.ReturnDate.HasValue &&
+            request.ReturnDate.Value < request.RentalDate)
+        {
+            return new Result<RentalModel>
+            {
+                IsSuccess = false,
+                Message = "Return date cannot be before rental date."
+            };
+        }
+
+        // An active rental can only use an available car.
+        if (request.Status == "Active" &&
+            car.Status != "Available")
+        {
+            return new Result<RentalModel>
+            {
+                IsSuccess = false,
+                Message = "The selected car is already rented."
             };
         }
 
@@ -142,6 +167,7 @@ public class RentalService
         if (request.Status == "Active")
         {
             car.Status = "Rented";
+            car.ModifiedDateTime = DateTime.Now;
         }
 
         _db.SaveChanges();
@@ -152,11 +178,14 @@ public class RentalService
             Message = "Rental created successfully."
         };
     }
-
-    public Result<RentalModel> Update(int id, RentalUpdateRequestModel request)
+    public Result<RentalModel> Update(
+        int id,
+        RentalUpdateRequestModel request)
     {
         var rental = _db.TblRentals
-            .FirstOrDefault(x => x.RentalId == id && x.IsDelete == false);
+            .FirstOrDefault(x =>
+                x.RentalId == id &&
+                x.IsDelete == false);
 
         if (rental is null)
         {
@@ -167,6 +196,67 @@ public class RentalService
             };
         }
 
+        var customer = _db.TblCustomers
+            .FirstOrDefault(x =>
+                x.CustomerId == request.CustomerId &&
+                x.IsDelete == false);
+
+        if (customer is null)
+        {
+            return new Result<RentalModel>
+            {
+                IsSuccess = false,
+                Message = "Customer not found."
+            };
+        }
+
+        var selectedCar = _db.TblCars
+            .FirstOrDefault(x =>
+                x.CarId == request.CarId &&
+                x.IsDelete == false);
+
+        if (selectedCar is null)
+        {
+            return new Result<RentalModel>
+            {
+                IsSuccess = false,
+                Message = "Car not found."
+            };
+        }
+
+        if (request.ReturnDate.HasValue &&
+            request.ReturnDate.Value < request.RentalDate)
+        {
+            return new Result<RentalModel>
+            {
+                IsSuccess = false,
+                Message = "Return date cannot be before rental date."
+            };
+        }
+
+        // Save the old values before changing the rental.
+        int previousCarId = rental.CarId;
+        string previousRentalStatus = rental.Status;
+
+        bool carIsAlreadyUsedByThisRental =
+            previousCarId == request.CarId &&
+            previousRentalStatus == "Active";
+
+        // When choosing another car, it must be available.
+        if (request.Status == "Active" &&
+            !carIsAlreadyUsedByThisRental &&
+            selectedCar.Status != "Available")
+        {
+            return new Result<RentalModel>
+            {
+                IsSuccess = false,
+                Message = "The selected car is already rented."
+            };
+        }
+
+        var previousCar = _db.TblCars
+            .FirstOrDefault(x => x.CarId == previousCarId);
+
         rental.CustomerId = request.CustomerId;
         rental.CarId = request.CarId;
         rental.RentalDate = request.RentalDate;
@@ -175,19 +265,23 @@ public class RentalService
         rental.Status = request.Status;
         rental.ModifiedDateTime = DateTime.Now;
 
-        var car = _db.TblCars.FirstOrDefault(x => x.CarId == request.CarId);
-
-        if (car is not null)
+        // The user selected a different car.
+        if (previousCarId != request.CarId)
         {
-            if (request.Status == "Active")
+            // Release the previous car.
+            if (previousCar is not null)
             {
-                car.Status = "Rented";
-            }
-            else if (request.Status == "Completed" || request.Status == "Cancelled")
-            {
-                car.Status = "Available";
+                previousCar.Status = "Available";
+                previousCar.ModifiedDateTime = DateTime.Now;
             }
         }
+
+        // Update the newly selected car, or the same existing car.
+        selectedCar.Status = request.Status == "Active"
+            ? "Rented"
+            : "Available";
+
+        selectedCar.ModifiedDateTime = DateTime.Now;
 
         _db.SaveChanges();
 

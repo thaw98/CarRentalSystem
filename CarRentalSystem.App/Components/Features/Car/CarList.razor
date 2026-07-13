@@ -1,0 +1,73 @@
+﻿@page "/cars"
+
+<PageTitle>Cars</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Cars</h3>
+
+    <a href="/cars/create" class="btn btn-primary">
+        Create Car
+    </a>
+</div>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+else if (cars.Count == 0)
+{
+    <div class="alert alert-info">No cars found.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Plate Number</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Year</th>
+                    <th>Price Per Day</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var car in cars)
+                {
+                    <tr>
+                        <td>@car.CarId</td>
+                        <td>@car.PlateNumber</td>
+                        <td>@car.Brand</td>
+                        <td>@car.Model</td>
+                        <td>@car.Year</td>
+                        <td>@car.PricePerDay.ToString("N2")</td>
+                        <td>
+                            <span class="@GetStatusClass(car.Status)">
+                                @car.Status
+                            </span>
+                        </td>
+                        <td>
+                            <a href="/cars/edit/@car.CarId"
+                               class="btn btn-sm btn-warning me-1">
+                                Edit
+                            </a>
+
+                            <a href="/cars/delete/@car.CarId"
+                               class="btn btn-sm btn-danger">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

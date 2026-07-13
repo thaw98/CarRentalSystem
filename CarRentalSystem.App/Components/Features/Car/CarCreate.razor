@@ -1,0 +1,68 @@
+﻿@page "/cars/create"
+
+<PageTitle>Create Car</PageTitle>
+
+<h3>Create Car</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <div class="mb-3">
+            <label class="form-label">Plate Number *</label>
+            <input @bind="model.PlateNumber"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Brand *</label>
+            <input @bind="model.Brand"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Model *</label>
+            <input @bind="model.Model"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Year *</label>
+            <input type="number"
+                   @bind="model.Year"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Price Per Day *</label>
+            <input type="number"
+                   step="0.01"
+                   min="0"
+                   @bind="model.PricePerDay"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <input value="Available"
+                   class="form-control"
+                   disabled />
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(error))
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+
+        <button type="button"
+                class="btn btn-primary"
+                disabled="@isSaving"
+                @onclick="Save">
+            @(isSaving ? "Saving..." : "Save")
+        </button>
+
+        <a href="/cars" class="btn btn-secondary">
+            Cancel
+        </a>
+
+    </div>
+</div>

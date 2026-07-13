@@ -1,0 +1,71 @@
+﻿@page "/payments"
+
+<PageTitle>Payments</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Payments</h3>
+
+    <a href="/payments/create" class="btn btn-primary">
+        Create Payment
+    </a>
+</div>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+else if (payments.Count == 0)
+{
+    <div class="alert alert-info">No payments found.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Rental ID</th>
+                    <th>Payment Date</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var payment in payments)
+                {
+                    <tr>
+                        <td>@payment.PaymentId</td>
+                        <td>@payment.RentalId</td>
+                        <td>@payment.PaymentDate.ToString("g")</td>
+                        <td>@payment.Amount.ToString("N2")</td>
+                        <td>@payment.PaymentMethod</td>
+                        <td>
+                            <span class="@GetStatusClass(payment.PaymentStatus)">
+                                @payment.PaymentStatus
+                            </span>
+                        </td>
+                        <td>
+                            <a href="/payments/edit/@payment.PaymentId"
+                               class="btn btn-sm btn-warning me-1">
+                                Edit
+                            </a>
+
+                            <a href="/payments/delete/@payment.PaymentId"
+                               class="btn btn-sm btn-danger">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

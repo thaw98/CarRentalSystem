@@ -1,0 +1,36 @@
+﻿@page "/customers/delete/{Id:int}"
+
+<PageTitle>Delete Customer</PageTitle>
+
+<h3>Delete Customer</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+
+    <a href="/customers" class="btn btn-secondary">
+        Back
+    </a>
+}
+else
+{
+    <div class="alert alert-warning">
+        Are you sure you want to delete
+        <strong>@customer?.Name</strong>?
+    </div>
+
+    <button type="button"
+            class="btn btn-danger"
+            disabled="@isDeleting"
+            @onclick="Delete">
+        @(isDeleting ? "Deleting..." : "Delete")
+    </button>
+
+    <a href="/customers" class="btn btn-secondary">
+        Cancel
+    </a>
+}

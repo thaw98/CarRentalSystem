@@ -1,0 +1,67 @@
+﻿@page "/customers"
+
+<PageTitle>Customers</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Customers</h3>
+
+    <a href="/customers/create" class="btn btn-primary">
+        Create Customer
+    </a>
+</div>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+else if (customers.Count == 0)
+{
+    <div class="alert alert-info">No customers found.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>NRC</th>
+                    <th>License Number</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var customer in customers)
+                {
+                    <tr>
+                        <td>@customer.CustomerId</td>
+                        <td>@customer.Name</td>
+                        <td>@customer.Phone</td>
+                        <td>@customer.Email</td>
+                        <td>@customer.Nrc</td>
+                        <td>@customer.LicenseNumber</td>
+                        <td>
+                            <a href="/customers/edit/@customer.CustomerId"
+                               class="btn btn-sm btn-warning me-1">
+                                Edit
+                            </a>
+
+                            <a href="/customers/delete/@customer.CustomerId"
+                               class="btn btn-sm btn-danger">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
